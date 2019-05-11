@@ -49,21 +49,35 @@ class Gui:
             u"COM-port 3"
         ])
         port_box.set(u"COM-port 1")
-        speed_label = tkinter.Label(self.connect_panel, text='Скорость')
+        speed_label = tkinter.Label(self.connect_panel, text='Скорость (бит/с)')
         speed_box = ttk.Combobox(self.connect_panel, width=35)
         speed_box.config(values=[
+            u"50",
+            u"75",
+            u"110",
+            u"150",
+            u"300",
+            u"600",
+            u"1200",
+            u"2400",
+            u"4800",
+            u"9600",
+            u"19200",
+            u"38400",
             u"57600",
-            u"30000",
-            u"70000"
+            u"115200"
         ])
-        speed_box.set(u"57600")
+        speed_box.set(u"9600")
         bit_data_label = tkinter.Label(self.connect_panel, text='Биты данных')
         bit_data_box = ttk.Combobox(self.connect_panel, width=35)
         bit_data_box.config(values=[
-            u"8",
-            u"16",
+            u"5",
+            u"6",
+            u"7",
+            u"8"
         ])
         bit_data_box.set(u"8")
+        # тут возможны варианты 1, 1.5, 2
         stop_bit_label = tkinter.Label(self.connect_panel, text='Стоп биты')
         stop_bit_box = ttk.Combobox(self.connect_panel, width=35)
         stop_bit_box.config(values=[
@@ -71,6 +85,7 @@ class Gui:
             u"2"
         ])
         stop_bit_box.set(u"1")
+        # тут возможны варианты NONE, EVEN, ODD, MARK, SPACE
         parity_label = tkinter.Label(self.connect_panel, text='Четность')
         parity_box = ttk.Combobox(self.connect_panel, width=35)
         parity_box.config(values=[
@@ -142,10 +157,10 @@ class Gui:
         open_but.bind('<Button-1>', self.load_file)
         quit.bind('<Button-1>', self.connection)
 
-    def private_messages_window(self, event):
-        self.connect_label.config(text='Личные сообщения')
-        self.main_panel.destroy()
-        self.previous_main = False
+    # def private_messages_window(self, event):
+    #     self.connect_label.config(text='Личные сообщения')
+    #     self.main_panel.destroy()
+    #     self.previous_main = False
 
     def history_window(self, event):
         self.connect_label.config(text='История сообщений')
