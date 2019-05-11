@@ -3,32 +3,68 @@ import threading
 from time import sleep
 
 
+class COMProvider:
+
+    def __init__(self):
+        self.outgoing_thread = OutgoingThread(self)
+        self.incoming_thread = IncomingThread(self)
+        self.com_port = None
+        self.start_threads()
+
+    def connect(self,
+                device_port='COM1',
+                speed=9600,
+                byte_size=serial.EIGHTBITS,
+                stop_bits=serial.STOPBITS_ONE,
+                parity=serial.PARITY_NONE):
+        self.com_port = SerialProvider(self,
+                                       device_port=device_port,
+                                       speed=speed,
+                                       byte_size=byte_size,
+                                       stop_bits=stop_bits,
+                                       parity=parity)
+        self.com_port.open()
+
+    def disconnect(self):
+        self.com_port.close()
+
+    def start_threads(self):
+        self.incoming_thread.start()
+        self.outgoing_thread.start()
+
+    def quit_threads(self):
+        self.outgoing_thread.is_alive = False
+        self.incoming_thread.is_alive = False
+
+    def sending(self, message):
+        self.outgoing_thread.message = message
+        self.outgoing_thread.sending_state = True
+
+    def quit(self):
+        self.disconnect()
+        self.quit_threads()
+
+
 class OutgoingThread(threading.Thread):
 
     def __init__(self, provider):
         threading.Thread.__init__(self, target=self.sending_loop)
-        # self.daemon = True
-        self.provider = provider
+        self.com_provider = provider
         self.alive = True
         self.sending_state = False
         self.message = None
 
     def sending_loop(self):
         while self.alive:
-            print(1)
             if self.sending_state:
-                print('okok')
-                self.provider.com_port.write(self.message)
+                self.com_provider.com_port.write(self.message)
                 self.sending_state = False
-                print('okok')
-                sleep(1)
 
 
 class IncomingThread(threading.Thread):
 
     def __init__(self, provider):
         threading.Thread.__init__(self, target=self.reading_loop)
-        # self.daemon = True
         self.provider = provider
         self.alive = True
         self.reading_state = False
@@ -51,7 +87,7 @@ class SerialProvider:
                  byte_size=serial.EIGHTBITS,
                  stop_bits=serial.STOPBITS_ONE,
                  parity=serial.PARITY_NONE):
-        self.provider = provider
+        self.com_provider = provider
         self.ser = serial.Serial()
         self.ser.port = device_port
         self.ser.baudrate = speed
@@ -87,6 +123,6 @@ class SerialProvider:
     def close(self):
         self.ser.close()
 
-# s = Provider()
+# s = COMProvider()
 # s.connect()
 # s.sending(b'hello')
