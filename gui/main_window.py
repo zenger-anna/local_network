@@ -5,9 +5,11 @@ from tkinter import filedialog
 
 
 class Gui:
-    def __init__(self):
+    def __init__(self, coding_provider):
         self.root = tkinter.Tk()
         self.root.geometry("405x340")
+        self.waiting = True
+        self.coding_provider = coding_provider
         self.connect_panel = None
         self.connect_label = None
         self.connect_but = None
@@ -21,6 +23,7 @@ class Gui:
         self.previous_main = True
         self.file_entry = None
         self.history_panel = None
+        self.widget_list = []
 
         self.connection(None)
         self.root.mainloop()
@@ -46,7 +49,8 @@ class Gui:
         port_box.config(values=[
             u"COM-port 1",
             u"COM-port 2",
-            u"COM-port 3"
+            u"COM-port 3",
+            u"COM-port 4"
         ])
         port_box.set(u"COM-port 1")
         speed_label = tkinter.Label(self.connect_panel, text='Скорость (бит/с)')
@@ -77,11 +81,11 @@ class Gui:
             u"8"
         ])
         bit_data_box.set(u"8")
-        # тут возможны варианты 1, 1.5, 2
         stop_bit_label = tkinter.Label(self.connect_panel, text='Стоп биты')
         stop_bit_box = ttk.Combobox(self.connect_panel, width=35)
         stop_bit_box.config(values=[
             u"1",
+            u"1.5",
             u"2"
         ])
         stop_bit_box.set(u"1")
@@ -89,10 +93,15 @@ class Gui:
         parity_label = tkinter.Label(self.connect_panel, text='Четность')
         parity_box = ttk.Combobox(self.connect_panel, width=35)
         parity_box.config(values=[
-            u"НЕТ",
-            u"ДА"
+            u"Отсутствует",
+            u"Дополнение до четности",
+            u"Дополнение до нечетности",
+            u"Всегда 1",
+            u"Всегда 0"
         ])
-        parity_box.set(u"НЕТ")
+        parity_box.set(u"Отсутствует")
+
+        self.widget_list.extend([login_entry, port_box, speed_box, bit_data_box, stop_bit_box, parity_box])
 
         login_label.grid(row=0, column=0, sticky='w', padx=10, pady=10)
         login_entry.grid(row=0, column=1, sticky='w', padx=10, pady=10)
@@ -107,9 +116,18 @@ class Gui:
         parity_label.grid(row=5, column=0, sticky='w', padx=10, pady=10)
         parity_box.grid(row=5, column=1, sticky='w', padx=10, pady=10)
 
-        self.connect_but.bind('<Button-1>', self.main_window)
+        self.connect_but.bind('<Button-1>', self.connect_to_main)
 
-    def main_window(self, event):
+    def connect_to_main(self, event):
+        if self.coding_provider.coding_connection(self.widget_list[0].get(),
+                                                  self.widget_list[1].get(),
+                                                  self.widget_list[2].get(),
+                                                  self.widget_list[3].get(),
+                                                  self.widget_list[4].get(),
+                                                  self.widget_list[5].get(),):
+            self.main_window()
+
+    def main_window(self):
         try:
             self.history_panel.destroy()
         except: pass
@@ -156,11 +174,6 @@ class Gui:
         history.bind('<Button-1>', self.history_window)
         open_but.bind('<Button-1>', self.load_file)
         quit.bind('<Button-1>', self.connection)
-
-    # def private_messages_window(self, event):
-    #     self.connect_label.config(text='Личные сообщения')
-    #     self.main_panel.destroy()
-    #     self.previous_main = False
 
     def history_window(self, event):
         self.connect_label.config(text='История сообщений')

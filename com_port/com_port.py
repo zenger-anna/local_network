@@ -69,12 +69,14 @@ class IncomingThread(threading.Thread):
         self.alive = True
         self.reading_state = False
         self.message = None
+        self.message_state = False
 
     def reading_loop(self):
         while self.alive:
             if self.reading_state:
                 self.message = self.provider.com_port.read()
-                # todo тут надо дописать, куда пойдет дальше сообщение
+                if self.message != '':
+                    self.message_state = True
                 sleep(1)
 
 
@@ -108,10 +110,10 @@ class SerialProvider:
             return 'Port is disconnected'
 
     def write(self, message):
-        try:
-            self.ser.write(message)
-        except:
-            print('Error sending message: please try again or check your connection')
+        # try:
+        self.ser.write(message)
+        # except:
+            # print('Error sending message: please try again or check your connection')
 
     def read(self):
         line = b''
@@ -125,4 +127,8 @@ class SerialProvider:
 
 # s = COMProvider()
 # s.connect()
-# s.sending(b'hello')
+# sas = 'hello'
+# sas = sas.encode()
+# # s =
+# s.sending(sas)
+# print('yeah')
