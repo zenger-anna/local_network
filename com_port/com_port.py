@@ -33,16 +33,17 @@ class COMProvider:
         self.outgoing_thread.start()
 
     def quit_threads(self):
-        self.outgoing_thread.is_alive = False
-        self.incoming_thread.is_alive = False
+        self.outgoing_thread.alive = False
+        self.incoming_thread.alive = False
 
     def sending(self, message):
         self.outgoing_thread.message = message
         self.outgoing_thread.sending_state = True
 
     def quit(self):
-        self.disconnect()
         self.quit_threads()
+        sleep(1)
+        self.disconnect()
 
 
 class OutgoingThread(threading.Thread):
@@ -59,6 +60,7 @@ class OutgoingThread(threading.Thread):
             if self.sending_state:
                 self.com_provider.com_port.write(self.message)
                 self.sending_state = False
+                sleep(1)
 
 
 class IncomingThread(threading.Thread):

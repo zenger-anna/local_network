@@ -10,6 +10,9 @@ class Gui:
         self.root.geometry("405x340")
         self.waiting = True
         self.coding_provider = coding_provider
+        self.coding_provider.escape_to_connection = self.connection
+        self.coding_provider.to_main_window = self.main_window
+        self.coding_provider.quit_gui = self.quit
         self.connect_panel = None
         self.connect_label = None
         self.connect_but = None
@@ -33,26 +36,18 @@ class Gui:
             self.main_panel.destroy()
         except: pass
 
-        self.root.geometry("405x340")
-        self.root.title("Bomonkagram")
+        self.root.geometry("460x340")
+        self.root.title("Main station")
         self.connect_panel =tkinter.Frame(self.root, width=450, height=350, relief=tkinter.GROOVE, bd=2)
         self.connect_panel.place(x=25, y=35)
         self.connect_label = tkinter.Label(self.root, text='Соединение')
         self.connect_label.place(x=25, y=5)
         self.connect_but = tkinter.Button(self.root, text='Соединить', width=12)
-        self.connect_but.place(y=304, x=286)
+        self.connect_but.place(y=304, x=346)
 
         login_label = tkinter.Label(self.connect_panel, text='Логин')
         login_entry = tkinter.Entry(self.connect_panel, width=35)
-        port_label = tkinter.Label(self.connect_panel, text='COM-порт')
-        port_box = ttk.Combobox(self.connect_panel, width=35)
-        port_box.config(values=[
-            u"COM-port 1",
-            u"COM-port 2",
-            u"COM-port 3",
-            u"COM-port 4"
-        ])
-        port_box.set(u"COM-port 1")
+        port_label = tkinter.Label(self.connect_panel, text='Параметры COM порта:')
         speed_label = tkinter.Label(self.connect_panel, text='Скорость (бит/с)')
         speed_box = ttk.Combobox(self.connect_panel, width=35)
         speed_box.config(values=[
@@ -101,12 +96,11 @@ class Gui:
         ])
         parity_box.set(u"Отсутствует")
 
-        self.widget_list.extend([login_entry, port_box, speed_box, bit_data_box, stop_bit_box, parity_box])
+        self.widget_list.extend([login_entry, speed_box, bit_data_box, stop_bit_box, parity_box])
 
         login_label.grid(row=0, column=0, sticky='w', padx=10, pady=10)
         login_entry.grid(row=0, column=1, sticky='w', padx=10, pady=10)
         port_label.grid(row=1, column=0, sticky='w', padx=10, pady=10)
-        port_box.grid(row=1, column=1, sticky='w', padx=10, pady=10)
         speed_label.grid(row=2, column=0, sticky='w', padx=10, pady=10)
         speed_box.grid(row=2, column=1, sticky='w', padx=10, pady=10)
         bit_data_label.grid(row=3, column=0, sticky='w', padx=10, pady=10)
@@ -119,13 +113,12 @@ class Gui:
         self.connect_but.bind('<Button-1>', self.connect_to_main)
 
     def connect_to_main(self, event):
-        if self.coding_provider.coding_connection(self.widget_list[0].get(),
-                                                  self.widget_list[1].get(),
-                                                  self.widget_list[2].get(),
-                                                  self.widget_list[3].get(),
-                                                  self.widget_list[4].get(),
-                                                  self.widget_list[5].get(),):
-            self.main_window()
+        if self.widget_list[0].get() != '':
+            self.coding_provider.coding_connection(self.widget_list[0].get(),
+                                                   self.widget_list[1].get(),
+                                                   self.widget_list[2].get(),
+                                                   self.widget_list[3].get(),
+                                                   self.widget_list[4].get())
 
     def main_window(self):
         try:
@@ -141,12 +134,11 @@ class Gui:
         self.connect_label.config(text='Главная')
         self.root.geometry('680x535')
         self.main_panel = tkinter.Frame(self.root, width=630, height=495)
-        self.general_chat = tkinter.Text(self.main_panel, height=22, width=57, wrap=tkinter.WORD, state='disabled')
-        users = tkinter.Text(self.main_panel, height=22, width=20, wrap=tkinter.WORD, state='disabled')
+        self.general_chat = tkinter.Text(self.main_panel, height=20, width=79, wrap=tkinter.WORD)
         message_label = tkinter.Label(self.main_panel, text='Сообщение:')
         self.message = tkinter.Entry(self.main_panel, width=75)
         file_label = tkinter.Label(self.main_panel, text='Файл:')
-        self.file_entry = tkinter.Entry(self.main_panel, width=20)
+        self.file_entry = tkinter.Entry(self.main_panel, width=52)
         open_but = tkinter.Button(self.main_panel, text='Открыть', width=14)
         send_message = tkinter.Button(self.main_panel, text='Отправить', width=20)
         self.connect = tkinter.Button(self.main_panel, text='Разединить', width=15)
@@ -156,24 +148,30 @@ class Gui:
 
         self.main_panel.place(x=25, y=35)
         self.general_chat.place(x=0, y=0)
-        users.place(x=480, y=0)
-        message_label.place(x=0, y=370)
-        self.message.place(x=0, y=395)
-        file_label.place(x=0, y=425)
-        self.file_entry.place(x=50, y=425)
-        open_but.place(x=185, y=420)
-        send_message.place(x=480, y=391)
+        message_label.place(x=0, y=330)
+        self.message.place(x=0, y=355)
+        file_label.place(x=0, y=385)
+        self.file_entry.place(x=0, y=410)
+        open_but.place(x=345, y=406)
+        send_message.place(x=480, y=351)
         # x = 304, y = 420
         self.connect.place(x=0, y=460)
         self.connect_state.place(x=130, y=463)
         history.place(x=395, y=463)
         quit.place(x=515, y=463)
 
+        self.coding_provider.encoding_thread.textbox = self.general_chat
+        self.coding_provider.decoding_thread.textbox = self.general_chat
+
         self.connect.bind('<Button-1>', self.change_state)
         send_message.bind('<Button-1>', self.send)
         history.bind('<Button-1>', self.history_window)
         open_but.bind('<Button-1>', self.load_file)
-        quit.bind('<Button-1>', self.connection)
+        quit.bind('<Button-1>', self.escape_to_connection)
+
+    def escape_to_connection(self, event):
+        self.coding_provider.initiator = True
+        self.coding_provider.coding_disconnection()
 
     def history_window(self, event):
         self.connect_label.config(text='История сообщений')
@@ -210,10 +208,10 @@ class Gui:
 
     def escape_handler(self, event):
         if self.previous_main:
-            self.main_window(None)
-        else:
-            # дописать возврат к личным сообщениям определенного юзера
-            self.private_messages_window(None)
+            self.main_window()
+        # else:
+        #     # дописать возврат к личным сообщениям определенного юзера
+        #     self.private_messages_window(None)
 
     def change_state(self, event):
         if self.state:
@@ -224,11 +222,11 @@ class Gui:
             self.state = True
             self.connect_state.config(text='Подключено')
             self.connect.config(text='Разъединить')
+        self.coding_provider.disconnection(self.state)
 
     def send(self, event):
-        # это не работает, надо через поток
-        mes = self.message.get()
-        self.general_chat.insert(1.0, mes)
+        if self.message.get() is not None and self.message.get() != '':
+            self.coding_provider.coding_message(self.message.get())
         self.message.delete(0, tkinter.END)
 
     def load_file(self, event):
@@ -237,5 +235,10 @@ class Gui:
             return
         self.file_entry.delete(0, 'end')
         self.file_entry.insert(0, _file)
+
+    def quit(self):
+        self.coding_provider.com_provider.quit()
+        self.coding_provider.quit()
+        self.root.quit()
 
 
